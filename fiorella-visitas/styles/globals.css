@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: #fdf8f5;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-rose-400 hover:bg-rose-500 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+  }
+  .btn-secondary {
+    @apply bg-white hover:bg-rose-50 text-rose-500 font-semibold py-3 px-6 rounded-2xl border border-rose-200 transition-all duration-200 shadow-sm active:scale-95;
+  }
+  .btn-danger {
+    @apply bg-red-100 hover:bg-red-200 text-red-600 font-semibold py-2 px-4 rounded-xl transition-all duration-200 active:scale-95;
+  }
+  .btn-success {
+    @apply bg-sage-100 hover:bg-sage-200 text-sage-600 font-semibold py-2 px-4 rounded-xl transition-all duration-200 active:scale-95;
+  }
+  .card {
+    @apply bg-white rounded-3xl shadow-sm border border-rose-100 p-6;
+  }
+  .input-field {
+    @apply w-full border border-rose-200 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white text-gray-700 placeholder-gray-400;
+  }
+}
