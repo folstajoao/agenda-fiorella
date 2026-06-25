@@ -95,7 +95,7 @@ export default function Admin() {
   useEffect(() => {
     if (authed) {
       loadConfig();
-      loadBookings(getTodayYMD());
+      loadBookings('');
     }
   }, [authed]);
 
@@ -137,7 +137,7 @@ export default function Admin() {
   const loadBookings = async (date) => {
     setLoading(true);
     try {
-      const r = await apiCall('getAdminBookings', { date });
+      const r = await apiCall('getAdminBookings', { date: date || '' });
       if (r && r.success) {
         setBookings((r.bookings || []).map(b => ({
           ...b,
@@ -277,75 +277,62 @@ export default function Admin() {
           {/* BOOKINGS */}
           {tab === 'bookings' && (
             <div>
-              <div className="flex items-center gap-3 mb-5">
-                <input type="date" className="input-field flex-1" value={selectedDate}
-                  onChange={e => { setSelectedDate(e.target.value); loadBookings(e.target.value); }} />
-                <button onClick={() => loadBookings(selectedDate)} className="btn-secondary whitespace-nowrap">🔄 Atualizar</button>
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="font-display text-gray-700 font-semibold">Pendentes de aprovação</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">Toque para aprovar ou recusar</p>
+                </div>
+                <button onClick={() => loadBookings('')} className="btn-secondary text-sm whitespace-nowrap">🔄 Atualizar</button>
               </div>
 
               {loading ? (
                 <div className="text-center text-rose-400 py-12">Carregando...</div>
-              ) : bookings.length === 0 ? (
+              ) : bookings.filter(b => b.status === 'pending').length === 0 ? (
                 <div className="card text-center text-gray-400">
-                  <div className="text-3xl mb-2">📭</div>
-                  <p>Nenhum agendamento neste dia.</p>
+                  <div className="text-3xl mb-2">✨</div>
+                  <p>Nenhuma visita pendente!</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {bookings.map(b => {
-                    const badge = statusBadge(b.status);
+                  {bookings.filter(b => b.status === 'pending').map(b => {
                     const waUrl = whatsappConfirm(b);
                     return (
                       <div key={safeStr(b.id)} className="card">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <div className="font-bold text-gray-700 text-lg">{b.slot}</div>
-                            <div className="text-gray-600 font-semibold">{b.name}</div>
-                            <div className="text-gray-400 text-sm">{b.guests} pessoa(s) · {b.phone}</div>
+                        {/* Summary */}
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-rose-100 rounded-2xl p-3 text-2xl">🌸</div>
+                          <div className="flex-1">
+                            <div className="font-bold text-gray-700">{b.name}</div>
+                            <div className="text-rose-500 font-semibold text-sm">{formatShort(b.date)} às {b.slot}</div>
+                            <div className="text-gray-400 text-xs">{b.guests} pessoa(s) · {b.phone}</div>
                           </div>
-                          <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${badge.cls}`}>{badge.label}</span>
                         </div>
 
                         {b.notes ? (
                           <div className="bg-gray-50 rounded-xl px-3 py-2 text-sm text-gray-500 mb-3">💬 {b.notes}</div>
                         ) : null}
 
-                        {b.adminNote ? (
-                          <div className="bg-rose-50 rounded-xl px-3 py-2 text-sm text-rose-500 mb-3">📝 Obs: {b.adminNote}</div>
-                        ) : null}
+                        <input className="input-field text-sm mb-3"
+                          placeholder="Observação (opcional)"
+                          value={safeStr(actionNote[b.id])}
+                          onChange={e => setActionNote(n => ({ ...n, [b.id]: e.target.value }))} />
 
-                        {b.status === 'pending' && (
-                          <div className="space-y-3">
-                            <input className="input-field text-sm"
-                              placeholder="Observação para a visita (opcional)"
-                              value={safeStr(actionNote[b.id])}
-                              onChange={e => setActionNote(n => ({ ...n, [b.id]: e.target.value }))} />
-                            <div className="flex gap-2">
-                              <button onClick={() => handleAction(b.id, 'confirm')} disabled={processingId === b.id}
-                                className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-2 px-4 rounded-xl transition-all text-sm">
-                                ✅ Confirmar
-                              </button>
-                              <button onClick={() => handleAction(b.id, 'refuse')} disabled={processingId === b.id}
-                                className="flex-1 bg-red-100 hover:bg-red-200 text-red-600 font-semibold py-2 px-4 rounded-xl transition-all text-sm">
-                                ❌ Recusar
-                              </button>
-                              {waUrl && (
-                                <a href={waUrl} target="_blank" rel="noopener noreferrer"
-                                  className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 rounded-xl transition-all flex items-center">
-                                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {b.status === 'confirmed' && waUrl && (
-                          <a href={waUrl} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-2 px-4 rounded-xl transition-all text-sm w-full mt-2">
-                            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                            Avisar confirmação pelo WhatsApp
-                          </a>
-                        )}
+                        <div className="flex gap-2">
+                          <button onClick={() => handleAction(b.id, 'confirm')} disabled={processingId === b.id}
+                            className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 font-bold py-3 rounded-2xl transition-all text-sm active:scale-95">
+                            ✅ Confirmar
+                          </button>
+                          <button onClick={() => handleAction(b.id, 'refuse')} disabled={processingId === b.id}
+                            className="flex-1 bg-red-100 hover:bg-red-200 text-red-600 font-bold py-3 rounded-2xl transition-all text-sm active:scale-95">
+                            ❌ Recusar
+                          </button>
+                          {waUrl && (
+                            <a href={waUrl} target="_blank" rel="noopener noreferrer"
+                              className="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-3 rounded-2xl transition-all flex items-center active:scale-95">
+                              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            </a>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
