@@ -97,8 +97,8 @@ export default function Home() {
   const [error, setError] = useState('');
 
   const [calPage, setCalPage] = useState(0);
-  const DATES_ALL = getNextDates(14); // 2 pages x 7 days
-  const dates = DATES_ALL.slice(calPage * 7, calPage * 7 + 7);
+  const DATES_ALL = getNextDates(28); // 2 pages x 14 days
+  const dates = DATES_ALL.slice(calPage * 14, calPage * 14 + 14);
 
   useEffect(() => {
     apiCall('getConfig').then(r => {
