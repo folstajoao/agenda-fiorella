@@ -176,7 +176,7 @@ export default function Home() {
   const adminPhone = safeStr(config.adminPhone);
   const whatsappHref = booking && adminPhone ? (() => {
     const clean = adminPhone.replace(/\D/g, '');
-    const msg = `Olá! Acabei de agendar uma visita para a Fiorella 🌸\n\n👤 ${safeStr(booking.name)}\n📅 ${formatShort(bookingDate)}\n🕐 ${safeStr(booking.slot)}\n👥 ${booking.guests} pessoa(s)`;
+    const msg = `Olá! Acabei de agendar uma visita para conhecer a Fiorella 🌸\n\n👤 ${safeStr(booking.name)}\n📅 ${formatShort(bookingDate)}\n🕐 ${safeStr(booking.slot)}\n👥 ${booking.guests} pessoa(s)\n\n---\nGuarde este link para cancelar se precisar: ${cancelUrl}`;
     return `https://wa.me/55${clean}?text=${encodeURIComponent(msg)}`;
   })() : null;
 
