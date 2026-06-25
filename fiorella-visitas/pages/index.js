@@ -96,7 +96,9 @@ export default function Home() {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const dates = getNextDates(14);
+  const [calPage, setCalPage] = useState(0);
+  const DATES_ALL = getNextDates(28); // 4 pages x 7 days
+  const dates = DATES_ALL.slice(calPage * 7, calPage * 7 + 7);
 
   useEffect(() => {
     apiCall('getConfig').then(r => {
@@ -234,7 +236,28 @@ export default function Home() {
           {/* CALENDAR */}
           {step === 'calendar' && (
             <div>
-              <h2 className="font-display text-lg text-gray-600 mb-4">Escolha um dia</h2>
+              {/* Page navigation */}
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  onClick={() => setCalPage(p => Math.max(0, p - 1))}
+                  disabled={calPage === 0}
+                  className={`flex items-center gap-1 px-4 py-2 rounded-2xl font-semibold text-sm transition-all ${calPage === 0 ? 'opacity-30 cursor-not-allowed text-gray-400' : 'text-rose-400 hover:bg-rose-50 active:scale-95'}`}
+                >
+                  ← Anterior
+                </button>
+                <span className="text-xs text-gray-400">
+                  Semana {calPage + 1} de 4
+                </span>
+                <button
+                  onClick={() => setCalPage(p => Math.min(3, p + 1))}
+                  disabled={calPage === 3}
+                  className={`flex items-center gap-1 px-4 py-2 rounded-2xl font-semibold text-sm transition-all ${calPage === 3 ? 'opacity-30 cursor-not-allowed text-gray-400' : 'text-rose-400 hover:bg-rose-50 active:scale-95'}`}
+                >
+                  Próxima →
+                </button>
+              </div>
+
+              {/* Date grid */}
               <div className="grid grid-cols-2 gap-3">
                 {dates.map(ymd => {
                   const blocked = isBlocked(ymd);
@@ -253,6 +276,15 @@ export default function Home() {
                   );
                 })}
               </div>
+
+              {/* Dot indicators */}
+              <div className="flex justify-center gap-2 mt-5">
+                {[0,1,2,3].map(i => (
+                  <button key={i} onClick={() => setCalPage(i)}
+                    className={`w-2 h-2 rounded-full transition-all ${calPage === i ? 'bg-rose-400 w-4' : 'bg-rose-200'}`} />
+                ))}
+              </div>
+
               {loadingSlots && <p className="text-center text-rose-400 mt-4">Carregando horários...</p>}
               {error && <p className="text-red-500 text-center mt-4">{error}</p>}
             </div>
