@@ -366,11 +366,7 @@ export default function Home() {
                   Avisar pelo WhatsApp
                 </a>
               )}
-              <div className="bg-gray-50 rounded-2xl p-3 mb-4">
-                <p className="text-xs text-gray-400 mb-1">Guarde este link para cancelar, se precisar:</p>
-                <p className="text-xs text-rose-400 break-all font-mono">{cancelUrl}</p>
-              </div>
-              <button onClick={() => { setStep('calendar'); setBooking(null); setForm({ name: '', phone: '', guests: 1, notes: '' }); }} className="btn-secondary w-full">
+              <button onClick={() => { setStep('calendar'); setBooking(null); setForm({ name: '', phone: '', guests: 1, notes: '' }); }} className="btn-secondary w-full mt-2">
                 Voltar ao início
               </button>
             </div>
