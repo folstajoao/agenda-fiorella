@@ -97,7 +97,7 @@ export default function Home() {
   const [error, setError] = useState('');
 
   const [calPage, setCalPage] = useState(0);
-  const DATES_ALL = getNextDates(28); // 4 pages x 7 days
+  const DATES_ALL = getNextDates(14); // 2 pages x 7 days
   const dates = DATES_ALL.slice(calPage * 7, calPage * 7 + 7);
 
   useEffect(() => {
@@ -246,11 +246,11 @@ export default function Home() {
                   ← Anterior
                 </button>
                 <span className="text-xs text-gray-400">
-                  Semana {calPage + 1} de 4
+                  {calPage + 1} de 2
                 </span>
                 <button
-                  onClick={() => setCalPage(p => Math.min(3, p + 1))}
-                  disabled={calPage === 3}
+                  onClick={() => setCalPage(p => Math.min(1, p + 1))}
+                  disabled={calPage === 1}
                   className={`flex items-center gap-1 px-4 py-2 rounded-2xl font-semibold text-sm transition-all ${calPage === 3 ? 'opacity-30 cursor-not-allowed text-gray-400' : 'text-rose-400 hover:bg-rose-50 active:scale-95'}`}
                 >
                   Próxima →
@@ -279,7 +279,7 @@ export default function Home() {
 
               {/* Dot indicators */}
               <div className="flex justify-center gap-2 mt-5">
-                {[0,1,2,3].map(i => (
+                {[0,1].map(i => (
                   <button key={i} onClick={() => setCalPage(i)}
                     className={`w-2 h-2 rounded-full transition-all ${calPage === i ? 'bg-rose-400 w-4' : 'bg-rose-200'}`} />
                 ))}
