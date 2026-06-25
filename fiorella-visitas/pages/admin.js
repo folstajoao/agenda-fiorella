@@ -135,18 +135,6 @@ export default function Admin() {
     } catch(e) { showToast('Erro ao carregar configurações'); }
   };
 
-  const fixSlot = (val) => {
-    if (!val) return '';
-    const s = String(val);
-    // If it's a full ISO date string like 1899-12-30T13:26:28.000Z, extract HH:MM
-    if (s.includes('T')) {
-      const timePart = s.split('T')[1] || '';
-      const [h, m] = timePart.split(':');
-      return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
-    }
-    return s;
-  };
-
   const loadBookings = async (date) => {
     setLoading(true);
     try {
@@ -155,7 +143,7 @@ export default function Admin() {
         setBookings((r.bookings || []).map(b => ({
           ...b,
           date: toYMD(b.date),
-          slot: fixSlot(b.slot),
+          slot: String(b.slot || '').replace(/^'/, ''),
           name: safeStr(b.name),
           phone: safeStr(b.phone),
           status: safeStr(b.status) || 'pending',
