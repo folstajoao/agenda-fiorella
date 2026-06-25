@@ -134,6 +134,18 @@ export default function Admin() {
     } catch(e) { showToast('Erro ao carregar configurações'); }
   };
 
+  const fixSlot = (val) => {
+    if (!val) return '';
+    const s = String(val);
+    // If it's a full ISO date string like 1899-12-30T13:26:28.000Z, extract HH:MM
+    if (s.includes('T')) {
+      const timePart = s.split('T')[1] || '';
+      const [h, m] = timePart.split(':');
+      return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+    }
+    return s;
+  };
+
   const loadBookings = async (date) => {
     setLoading(true);
     try {
@@ -142,7 +154,7 @@ export default function Admin() {
         setBookings((r.bookings || []).map(b => ({
           ...b,
           date: toYMD(b.date),
-          slot: safeStr(b.slot),
+          slot: fixSlot(b.slot),
           name: safeStr(b.name),
           phone: safeStr(b.phone),
           status: safeStr(b.status) || 'pending',
@@ -158,7 +170,7 @@ export default function Admin() {
     setProcessingId(bookingId);
     try {
       const note = safeStr(actionNote[bookingId]);
-      const r = await apiCall('adminAction', { bookingId, action, note });
+      const r = await apiCall('adminAction', { bookingId, adminAction: action, note });
       if (r && r.success) {
         showToast(action === 'confirm' ? '✅ Visita confirmada!' : '❌ Visita recusada.');
         loadBookings(selectedDate);
